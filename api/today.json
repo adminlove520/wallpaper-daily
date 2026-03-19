@@ -1,13 +1,22 @@
 {
   "date": "2026-03-19",
-  "generatedAt": "2026-03-19T05:59:17.588909Z",
+  "generatedAt": "2026-03-19T06:02:33.939227Z",
   "categories": {
     "bing": {
       "title": "激发你的好奇心",
       "url": "https://www.bing.com/th?id=OHR.EchidnaAustralia_ZH-CN0913792118_1920x1080.jpg"
     },
-    "desktop": null,
-    "mobile": null,
-    "avatar": null
+    "desktop": {
+      "title": "SY-女孩2-个性",
+      "url": "https://raw.githubusercontent.com/IT-NuanxinPro/nuanXinProPic/main/preview/desktop/人像/清新/SY-女孩2-个性.webp"
+    },
+    "mobile": {
+      "title": "黑发女孩手持奶茶慵懒瞬间",
+      "url": "https://raw.githubusercontent.com/IT-NuanxinPro/nuanXinProPic/main/preview/mobile/人像/氛围感/黑发女孩手持奶茶慵懒瞬间.webp"
+    },
+    "avatar": {
+      "title": "花语欢笑",
+      "url": "https://raw.githubusercontent.com/IT-NuanxinPro/nuanXinProPic/main/wallpaper/avatar/人像/氛围感/花语欢笑.png"
+    }
   }
 }
