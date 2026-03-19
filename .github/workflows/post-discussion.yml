@@ -13,25 +13,46 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          # 安装 Python
-          sudo apt-get update -qq && sudo apt-get install -y -qq python3
-
-          # 获取数据
           DATA=$(curl -s "https://wallpaper-daily-iota.vercel.app/api/latest")
           
-          # 用 Python 提取数据
-          DESKTOP_TITLE=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['desktop']['title'])")
-          DESKTOP_URL=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['desktop']['url'])")
-          MOBILE_TITLE=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['mobile']['title'])")
-          MOBILE_URL=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['mobile']['url'])")
-          AVATAR_TITLE=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['avatar']['title'])")
-          AVATAR_URL=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['avatar']['url'])")
+          DESKTOP_TITLE=$(echo "$DATA" | jq -r '.categories.desktop.title')
+          DESKTOP_URL=$(echo "$DATA" | jq -r '.categories.desktop.url')
+          MOBILE_TITLE=$(echo "$DATA" | jq -r '.categories.mobile.title')
+          MOBILE_URL=$(echo "$DATA" | jq -r '.categories.mobile.url')
+          AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title')
+          AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url')
 
-          # 构建 body
-          BODY="Desktop: $DESKTOP_TITLE $DESKTOP_URL Mobile: $MOBILE_TITLE $MOBILE_URL Avatar: $AVATAR_TITLE $AVATAR_URL"
+          # 手动拼接 JSON body
+          python3 << PYEOF
+import json
+import os
 
-          # 用 Python 生成 JSON
-          PAYLOAD=$(python3 -c "import json; print(json.dumps({'query': 'mutation { addDiscussionComment(input: { discussionId: \"D_kwDORQmU5s4Ak6V-\", body: \"$BODY\" }) { comment { id } } }'}))")
+body = f"""## 📅 每日壁纸推荐
 
-          # 发送
-          curl -X POST https://api.github.com/graphql -H "Authorization: bearer $GH_TOKEN" -H "Content-Type: application/json" -d "$PAYLOAD"
+### 🖥️ Desktop
+**{os.environ['DESKTOP_TITLE']}**
+![Desktop]({os.environ['DESKTOP_URL']})
+
+### 📱 Mobile
+**{os.environ['MOBILE_TITLE']}**
+![Mobile]({os.environ['MOBILE_URL']})
+
+### 🧑‍🎤 Avatar
+**{os.environ['AVATAR_TITLE']}**
+![Avatar]({os.environ['AVATAR_URL']})
+
+---
+*自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*"""
+
+query = f'mutation {{ addDiscussionComment(input: {{ discussionId: "D_kwDORQmU5s4Ak6V-", body: """{body}""" }}) {{ comment {{ id }} }} }}'
+
+payload = json.dumps({"query": query})
+print(payload)
+PYEOF
+
+          > payload.json
+
+          curl -X POST https://api.github.com/graphql \
+            -H "Authorization: bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d @payload.json
