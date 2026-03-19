@@ -14,56 +14,55 @@ else:
 
 REPO = "IT-NuanxinPro/nuanXinProPic"
 
-def gh_request(path, token=None):
-    """GitHub API 请求"""
-    url = "https://api.github.com/repos/%s/%s" % (REPO, path)
+# 确保输出是 UTF-8
+if sys.version_info[0] >= 3:
+    pass
+else:
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
+def gh_tree(path, token=None):
+    """使用 GitHub Tree API 获取文件列表"""
+    # 使用 tree API 获取整个树
+    url = "https://api.github.com/repos/%s/git/trees/main?recursive=1" % REPO
     req = urllib.request.Request(url)
     req.add_header("Accept", "application/vnd.github.v3+json")
     if token:
         req.add_header("Authorization", "token %s" % token)
-    else:
-        req.add_header("User-Agent", "wallpaper-sync-bot")
     resp = urllib.request.urlopen(req, timeout=30)
     return json.loads(resp.read().decode('utf-8'))
 
-def get_latest(category, token=None):
+def get_latest_by_prefix(prefix, token=None):
+    """获取指定前缀目录下的最新文件"""
     try:
-        if category == "desktop":
-            base = "preview/desktop"
-        elif category == "mobile":
-            base = "preview/mobile"
-        elif category == "avatar":
-            base = "wallpaper/avatar"
-        else:
+        data = gh_tree("", token)
+        tree = data.get("tree", [])
+        
+        # 找到匹配的文件
+        files = []
+        for item in tree:
+            if item.get("type") == "blob" and item["path"].startswith(prefix):
+                files.append(item)
+        
+        if not files:
             return None
         
-        # 获取目录列表
-        contents = gh_request("contents/" + base, token)
-        latest = None
-        latest_date = ""
+        # 按路径排序，取最新的
+        files.sort(key=lambda x: x.get("sha", ""), reverse=True)
+        latest = files[0]
         
-        for item in contents:
-            if item.get("type") != "dir":
-                continue
-            # 获取子目录
-            sub = gh_request("contents/" + item["path"], token)
-            for f in sub:
-                if f.get("type") != "file":
-                    continue
-                updated = f.get("updated_at", "")
-                if updated > latest_date:
-                    latest_date = updated
-                    latest = f
+        name = os.path.basename(latest["path"])
+        title = name.rsplit(".", 1)[0] if "." in name else name
         
-        if latest:
-            name = latest.get("name", "").rsplit(".", 1)[0]
-            # 使用 download_url，它已经是正确的 URL
-            url = latest.get("download_url", "")
-            return {"title": name, "url": url}
+        # 构建 raw URL
+        url = "https://raw.githubusercontent.com/%s/main/%s" % (REPO, latest["path"])
+        
+        return {"title": title, "url": url}
     except Exception as e:
-        print("Error in %s: %s" % (category, e), flush=True)
-    
-    return None
+        print("Error in %s: %s" % (prefix, e), flush=True)
+        import traceback
+        traceback.print_exc()
+        return None
 
 def main():
     token = os.environ.get("GH_TOKEN", None)
@@ -89,10 +88,14 @@ def main():
         print("Bing error: %s" % e, flush=True)
         categories["bing"] = None
     
-    # 其他分类 - 使用 GitHub Token
-    categories["desktop"] = get_latest("desktop", token)
-    categories["mobile"] = get_latest("mobile", token)
-    categories["avatar"] = get_latest("avatar", token)
+    # Desktop
+    categories["desktop"] = get_latest_by_prefix("preview/desktop/", token)
+    
+    # Mobile
+    categories["mobile"] = get_latest_by_prefix("preview/mobile/", token)
+    
+    # Avatar
+    categories["avatar"] = get_latest_by_prefix("wallpaper/avatar/", token)
     
     output = {
         "date": datetime.now().strftime("%Y-%m-%d"),
