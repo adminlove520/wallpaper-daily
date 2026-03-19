@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-壁纸数据同步脚本 v2
-从多个数据源获取最新壁纸数据
+壁纸数据同步脚本 v3
+从 wallpaper.061129.xyz CDN 获取最新壁纸数据
 """
 
 import json
@@ -10,30 +10,34 @@ import os
 from datetime import datetime
 
 # 配置
-BING_API_URL = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN"
-WALLPAPER_GALLERY_DATA = "https://raw.githubusercontent.com/adminlove520/wallpaper-gallery/main/public/data"
+CDN_BASE = "https://wallpaper.061129.xyz/data"
 OUTPUT_DIR = "api"
+
+def fetch_json(url):
+    """获取 JSON 数据"""
+    req = urllib.request.Request(url)
+    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+    with urllib.request.urlopen(req, timeout=30) as response:
+        return json.loads(response.read())
 
 def get_bing_wallpaper():
     """获取今日 Bing 壁纸"""
     try:
-        with urllib.request.urlopen(BING_API_URL, timeout=10) as response:
-            data = json.loads(response.read())
-        
-        img = data['images'][0]
-        urlbase = img['urlbase']
-        
-        return {
-            "title": img['title'],
-            "copyright": img['copyright'],
-            "date": img['startdate'],
-            "urlbase": urlbase,
-            "url_1920x1080": f"https://www.bing.com{urlbase}_1920x1080.jpg",
-            "url_4k": f"https://www.bing.com{urlbase}_UHD.jpg"
-        }
+        data = fetch_json(f"{CDN_BASE}/bing/latest.json")
+        if data.get('items'):
+            img = data['items'][0]
+            urlbase = img['urlbase']
+            return {
+                "title": img['title'],
+                "copyright": img['copyright'],
+                "date": img['date'],
+                "urlbase": urlbase,
+                "url_1920x1080": f"https://www.bing.com{urlbase}_1920x1080.jpg",
+                "url_4k": f"https://www.bing.com{urlbase}_UHD.jpg"
+            }
     except Exception as e:
         print(f"Error fetching Bing: {e}")
-        return {"title": "", "url_1920x1080": ""}
+    return {"title": "", "url_1920x1080": ""}
 
 def generate_today_json(bing_data):
     """生成今日汇总 JSON"""
@@ -42,15 +46,14 @@ def generate_today_json(bing_data):
     result = {
         "date": today,
         "generatedAt": datetime.now().isoformat() + "Z",
+        "source": "https://wallpaper.061129.xyz",
         "categories": {
             "bing": bing_data,
-            # 其他分类暂时无法自动获取
-            # 需要 wallpaper-gallery 网站支持 API
+            # TODO: 其他分类需要单独获取
             "desktop": None,
             "mobile": None,
             "avatar": None
-        },
-        "note": "Bing 每日自动更新。其他分类需要 wallpaper-gallery 网站支持 API。"
+        }
     }
     
     return result
@@ -65,7 +68,7 @@ def save_json(data, filename):
 
 def main():
     print("=" * 50)
-    print("壁纸数据同步 v2")
+    print("壁纸数据同步 v3 (使用 CDN)")
     print("=" * 50)
     
     # 获取 Bing 壁纸
@@ -84,9 +87,6 @@ def main():
     print("\n" + "=" * 50)
     print("同步完成!")
     print("=" * 50)
-    
-    print("\n注意: 其他分类 (desktop/mobile/avatar) 需要")
-    print("wallpaper-gallery 网站添加 API 支持才能自动获取。")
 
 if __name__ == "__main__":
     main()
