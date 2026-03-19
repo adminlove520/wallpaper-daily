@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 获取壁纸并发送评论
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           # 获取数据
           DATA=$(curl -s "https://wallpaper-daily-iota.vercel.app/api/latest")
@@ -21,13 +23,33 @@ jobs:
           AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title')
           AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url')
 
-          # 用 gh api graphql（和之前成功的一样）
-          gh api graphql -f query='mutation { addDiscussionComment(input: { discussionId: "D_kwDORQmU5s4Ak6V-", body: "## 每日壁纸推荐
+          # 用 Python 生成合法的 JSON
+          python3 << 'PYEOF'
+import json
+import os
 
-Desktop: '"$DESKTOP_TITLE"' '"$DESKTOP_URL"'
+body = """## 每日壁纸推荐
 
-Mobile: '"$MOBILE_TITLE"' '"$MOBILE_URL"'
+Desktop: """ + os.environ['DESKTOP_TITLE'] + """
+""" + os.environ['DESKTOP_URL'] + """
 
-Avatar: '"$AVATAR_TITLE"' '"$AVATAR_URL"'
+Mobile: """ + os.environ['MOBILE_TITLE'] + """
+""" + os.environ['MOBILE_URL'] + """
 
-自动同步自 nuanXinProPic" }) { comment { id } } }'
+Avatar: """ + os.environ['AVATAR_TITLE'] + """
+""" + os.environ['AVATAR_URL'] + """
+
+自动同步自 nuanXinProPic"""
+
+body_json = json.dumps(body)
+query = 'mutation { addDiscussionComment(input: { discussionId: "D_kwDORQmU5s4Ak6V-", body: ' + body_json + ' }) { comment { id } } }'
+payload = json.dumps({"query": query})
+print(payload)
+PYEOF
+
+          > payload.json
+
+          curl -X POST https://api.github.com/graphql \
+            -H "Authorization: bearer $GH_PAT" \
+            -H "Content-Type: application/json" \
+            -d @payload.json
