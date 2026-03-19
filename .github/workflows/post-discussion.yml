@@ -24,8 +24,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          BODY=$(cat << 'MARKDOWN'
-          ## 📅 每日壁纸推荐 ${{ env.DATE }}
+          BODY="## 📅 每日壁纸推荐 ${{ env.DATE }}
 
           ### 🖥️ Desktop
           **${{ env.DESKTOP_TITLE }}**
@@ -40,12 +39,11 @@ jobs:
           ![Avatar](${{ env.AVATAR_URL }})
 
           ---
-          *自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*
-          MARKDOWN
-          )
+          *自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*"
 
-          # 用 GraphQL API 发评论
-          curl -X POST https://api.github.com/graphql \
-            -H "Authorization: bearer ${{ env.GH_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"query\":\"mutation { addDiscussionComment(input: { discussionId: 9676158, body: \\\"$BODY\\\" }) { comment { id } } }\"}"
+          # 发到 openclaw-qa 仓库的 discussion #132
+          curl -X POST \
+            -H "Authorization: token ${{ env.GH_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/ythx-101/openclaw-qa/discussions/132/comments" \
+            -d "{\"body\":\"$BODY\"}"
