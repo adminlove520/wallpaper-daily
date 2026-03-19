@@ -24,27 +24,28 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
+          # 构建 markdown，注意标题后要换行
           BODY="## 📅 每日壁纸推荐 ${{ env.DATE }}
 
-          ### 🖥️ Desktop
-          **${{ env.DESKTOP_TITLE }}**
-          ![Desktop](${{ env.DESKTOP_URL }})
+### 🖥️ Desktop
+**${{ env.DESKTOP_TITLE }}**
+![Desktop](${{ env.DESKTOP_URL }})
 
-          ### 📱 Mobile
-          **${{ env.MOBILE_TITLE }}**
-          ![Mobile](${{ env.MOBILE_URL }})
+### 📱 Mobile
+**${{ env.MOBILE_TITLE }}**
+![Mobile](${{ env.MOBILE_URL }})
 
-          ### 🧑‍🎤 Avatar
-          **${{ env.AVATAR_TITLE }}**
-          ![Avatar](${{ env.AVATAR_URL }})
+### 🧑‍🎤 Avatar
+**${{ env.AVATAR_TITLE }}**
+![Avatar](${{ env.AVATAR_URL }})
 
-          ---
-          *自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*"
+---
+*自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*"
 
           # 用 GraphQL API 发评论
-          echo "{\"query\": \"mutation { addDiscussionComment(input: { discussionId: \\\"D_kwDORQmU5s4Ak6V-\\\", body: \\\"$BODY\\\" }) { comment { id } } }\"}" > mutation.json
+          PAYLOAD="{\"query\": \"mutation { addDiscussionComment(input: { discussionId: \\\"D_kwDORQmU5s4Ak6V-\\\", body: \\\"$BODY\\\" }) { comment { id } } }\"}"
 
           curl -X POST https://api.github.com/graphql \
             -H "Authorization: bearer ${{ env.GH_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d @mutation.json
+            -d "$PAYLOAD"
