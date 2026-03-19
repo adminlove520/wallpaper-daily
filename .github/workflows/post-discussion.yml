@@ -23,7 +23,7 @@ jobs:
       - name: 发评论到 Discussion
         uses: wesleyscholl/create-discussion-comment@v1.0.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
           discussion-id: "D_kwDORQmU5s4Ak6V-"
           body: |
             ## 📅 每日壁纸推荐 ${{ env.DATE }}
