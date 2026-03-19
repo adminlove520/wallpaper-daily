@@ -10,7 +10,7 @@ from datetime import datetime
 REPO = "IT-NuanxinPro/nuanXinProPic"
 
 def get_latest_from_metadata(category):
-    """从 metadata JSON 获取最新图片，直接用 @latest"""
+    """从 metadata JSON 获取最新图片"""
     try:
         if category == "desktop":
             meta_file = "desktop.json"
@@ -21,7 +21,6 @@ def get_latest_from_metadata(category):
         else:
             return None
         
-        # 直接用 @latest
         meta_url = "https://cdn.jsdelivr.net/gh/%s@latest/metadata/%s" % (REPO, meta_file)
         req = urllib.request.Request(meta_url)
         resp = urllib.request.urlopen(req, timeout=30)
@@ -39,12 +38,13 @@ def get_latest_from_metadata(category):
         
         first_path, info = sorted_images[0]
         
-        # 直接用 @latest
         url = "https://cdn.jsdelivr.net/gh/%s@latest/%s" % (REPO, first_path)
         
-        # title 用 filename
-        filename = info.get("filename", "")
-        title = filename.rsplit(".", 1)[0] if filename else first_path
+        # title 优先用 ai.displayTitle
+        ai_info = info.get("ai", {})
+        title = ai_info.get("displayTitle") or info.get("filename", "")
+        if title and "." in title:
+            title = title.rsplit(".", 1)[0]
         
         return {"title": title, "url": url}
         
@@ -75,7 +75,6 @@ def main():
         print("Bing error: %s" % e, flush=True)
         categories["bing"] = None
     
-    # 其他分类 - 全部用 @latest
     categories["desktop"] = get_latest_from_metadata("desktop")
     categories["mobile"] = get_latest_from_metadata("mobile")
     categories["avatar"] = get_latest_from_metadata("avatar")
