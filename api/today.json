@@ -1,19 +1,13 @@
 {
   "date": "2026-03-19",
-  "generatedAt": "2026-03-19T13:20:00Z",
+  "generatedAt": "2026-03-19T13:33:56.764158Z",
   "categories": {
     "bing": {
       "title": "激发你的好奇心",
       "url": "https://www.bing.com/th?id=OHR.EchidnaAustralia_ZH-CN0913792118_1920x1080.jpg"
     },
-    "desktop": {
-      "title": "二次元-倒影",
-      "url": "https://raw.githubusercontent.com/IT-NuanxinPro/nuanXinProPic/main/preview/desktop/%E5%8A%A8%E9%81%93%E6%96%B9/%E4%BA%8C%E6%AC%A1%E5%85%83/%E4%BA%8C%E6%AC%A1%E5%85%83-%E5%80%92%E5%BD%B1.webp"
-    },
-    "mobile": {
-      "title": "橘顶噜噜破璃萌现",
-      "url": "https://raw.githubusercontent.com/IT-NuanxinPro/nuanXinProPic/main/preview/mobile/IP%E5%BD%A2%E8%B1%A1/%E6%B0%B4%E8%B1%9A%E5%99%9C%E5%99%9C/%E6%A9%98%E9%A1%B6%E5%99%9C%E5%99%9C%E7%A0%B4%E7%92%83%E8%90%8C%E7%8E%B0.webp"
-    },
+    "desktop": null,
+    "mobile": null,
     "avatar": null
   }
 }

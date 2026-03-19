@@ -1,40 +1,38 @@
-name: 每日壁纸同步
+name: Daily Wallpaper Sync
 
 on:
   schedule:
-    # 每天 10:00 UTC 运行 (= 18:00 北京时间)
-    - cron: '0 10 * * *'
-  workflow_dispatch:  # 支持手动触发
+    - cron: "0 2 * * *"  # 每天 10:00 UTC
+  workflow_dispatch:
   push:
     branches:
       - main
-
-permissions:
-  contents: write
+    paths:
+      - 'scripts/**'
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: 设置 Python
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           
-      - name: 运行同步脚本
+      - name: Run sync script
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/sync.py
+          python scripts/sync_github.py
           
-      - name: 提交更改
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "docs: 更新每日壁纸数据 $(date '+%Y-%m-%d')"
-          file_pattern: "api/*.json"
-          commit_user_name: github-actions[bot]
-          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+      - name: Commit and push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add api/today.json
+          git diff --staged --quiet || git commit -m "chore: 同步最新壁纸 $(date +%Y-%m-%d)"
+          git push
