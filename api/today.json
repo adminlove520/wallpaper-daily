@@ -1,6 +1,6 @@
 {
   "date": "2026-03-19",
-  "generatedAt": "2026-03-19T11:52:00Z",
+  "generatedAt": "2026-03-19T12:03:00Z",
   "categories": {
     "bing": {
       "title": "激发你的好奇心",
@@ -8,15 +8,15 @@
     },
     "desktop": {
       "title": "彩虹发色的梦幻少女仰望星空",
-      "url": "https://cdn.jsdelivr.net/gh/IT-NuanxinPro/nuanXinProPic@main/preview/desktop/动漫/彩虹发色的梦幻少女仰望星空.png"
+      "url": "https://raw.githubusercontent.com/IT-NuanxinPro/nuanXinProPic/refs/heads/main/preview/desktop/%E5%BD%A9%E8%89%B2%E5%8F%91%E8%89%B2%E7%9A%84%E6%A2%A6%E5%B9%BB%E5%B0%8F%E5%A5%B3%E5%B0%8F%E6%9C%9B%E6%9C%9B%E5%AF%92%E6%9D%BE.png"
     },
     "mobile": {
-      "title": "阳光下快乐的毛绒朋友们",
-      "url": "https://cdn.jsdelivr.net/gh/IT-NuanxinPro/nuanXinProPic@main/preview/mobile/萌宠/兔耳朵/微信图片_20260310202301_668_4.webp"
+      "title": "水豚噜噜",
+      "url": "https://raw.githubusercontent.com/IT-NuanxinPro/nuanXinProPic/refs/heads/main/preview/mobile/IP%E5%BD%A2%E8%B1%A1/%E6%B0%B4%E8%B1%9A%E5%99%9C%E5%99%9C/%E6%A9%98%E9%A1%B6%E5%99%9C%E5%99%9C%E7%A0%B4%E7%92%83%E8%90%8C%E7%8E%B0.webp"
     },
     "avatar": {
       "title": "可爱的水豚噜噜",
-      "url": "https://cdn.jsdelivr.net/gh/IT-NuanxinPro/nuanXinProPic@main/preview/avatar/IP形象/水豚噜噜.jpg"
+      "url": "https://raw.githubusercontent.com/IT-NuanxinPro/nuanXinProPic/refs/heads/main/preview/avatar/IP%E5%BD%A2%E8%B1%A1/%E6%B0%B4%E8%B1%9A%E5%99%9C%E5%99%9C.jpg"
     }
   }
 }
