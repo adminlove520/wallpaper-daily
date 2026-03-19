@@ -7,7 +7,6 @@ import json
 import urllib.request
 from datetime import datetime
 
-# 强制 UTF-8
 if sys.version_info[0] >= 3:
     import urllib.parse as urlparse
 else:
@@ -24,12 +23,10 @@ def gh_request(path):
     return json.loads(resp.read().decode('utf-8'))
 
 def encode_path(path):
-    """正确编码中文路径"""
     parts = path.split('/')
     encoded = []
     for p in parts:
-        # 先编码为URL编码，再替换 % 为 %25
-        e = urllib.parse.quote(p, safe='')
+        e = urlparse.quote(p, safe='')
         encoded.append(e)
     return '/'.join(encoded)
 
@@ -63,11 +60,15 @@ def get_latest(category):
         if latest:
             name = latest.get("name", "").rsplit(".", 1)[0]
             path = latest.get("path", "")
+            print("DEBUG: path=%s" % path, flush=True)
             encoded = encode_path(path)
+            print("DEBUG: encoded=%s" % encoded, flush=True)
             url = "https://raw.githubusercontent.com/%s/main/%s" % (REPO, encoded)
             return {"title": name, "url": url}
     except Exception as e:
         print("Error in %s: %s" % (category, e), flush=True)
+        import traceback
+        traceback.print_exc()
     
     return None
 
