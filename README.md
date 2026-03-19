@@ -4,11 +4,38 @@
 
 ## 数据接口
 
-| 接口 | 地址 |
-|------|------|
-| 今日所有壁纸 | `https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/today.json` |
+### 方式一：GitHub RAW（当前可用）
+```
+https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/today.json
+```
+
+### 方式二：Vercel API（需要部署）
+```
+https://wallpaper-daily.vercel.app/api/latest
+```
 
 > ⚠️ 注意：由于技术限制，当前只支持 Bing 每日自动更新。
+
+## 快速部署到 Vercel
+
+```bash
+# 1. 安装 Vercel CLI
+npm i -g vercel
+
+# 2. 进入目录
+cd wallpaper-daily
+
+# 3. 登录
+vercel login
+
+# 4. 部署
+vercel
+
+# 5. 之后每次更新
+vercel --prod
+```
+
+部署后访问：`https://your-project.vercel.app/api/latest`
 
 ## 数据格式
 
@@ -30,38 +57,11 @@
 }
 ```
 
-## 自动同步
-
-- ✅ 每天 10:00 UTC 自动从 Bing API 获取最新数据
-- ⏳ 其他分类需要 wallpaper-gallery 网站支持 API
-
 ## 其他分类解决方案
 
 ### 方案：在 wallpaper-gallery 添加 API
 
-在网站添加 `/api/latest` 接口，返回所有分类的最新壁纸：
-
-```json
-{
-  "date": "2026-03-19",
-  "categories": {
-    "bing": { "title": "...", "url": "..." },
-    "desktop": { "title": "...", "url": "..." },
-    "mobile": { "title": "...", "url": "..." },
-    "avatar": { "title": "...", "url": "..." }
-  }
-}
-```
-
-然后小溪就能直接调用这个 API 了！
-
-### 实现方式
-
-1. **Cloudflare Workers**（推荐）
-2. **静态 JSON + GitHub Actions 定时更新**
-3. **网站构建时生成**
-
----
+在网站添加 `/api/latest` 接口，返回所有分类的最新壁纸。
 
 ## 使用示例
 
@@ -75,6 +75,20 @@ data = json.loads(urllib.request.urlopen(url).read())
 bing = data['categories']['bing']
 print(f"今日壁纸: {bing['title']}")
 print(f"链接: {bing['url_1920x1080']}")
+```
+
+## 文件结构
+
+```
+wallpaper-daily/
+├── api/
+│   ├── today.json      # GitHub RAW 使用的静态文件
+│   └── latest.js       # Vercel Serverless Function
+├── scripts/
+│   └── sync.py         # 同步脚本
+├── worker.js           # Cloudflare Worker 模板
+├── vercel.json         # Vercel 配置
+└── README.md
 ```
 
 ---
