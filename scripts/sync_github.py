@@ -14,29 +14,19 @@ else:
 
 REPO = "IT-NuanxinPro/nuanXinProPic"
 
-def gh_request_raw(path):
-    """原始请求，不编码"""
+def gh_request(path, token=None):
+    """GitHub API 请求"""
     url = "https://api.github.com/repos/%s/%s" % (REPO, path)
     req = urllib.request.Request(url)
     req.add_header("Accept", "application/vnd.github.v3+json")
-    req.add_header("User-Agent", "wallpaper-sync-bot")
+    if token:
+        req.add_header("Authorization", "token %s" % token)
+    else:
+        req.add_header("User-Agent", "wallpaper-sync-bot")
     resp = urllib.request.urlopen(req, timeout=30)
     return json.loads(resp.read().decode('utf-8'))
 
-def gh_request(path):
-    """带URL编码的请求"""
-    # 对路径进行UTF-8编码后再URL编码
-    if isinstance(path, str):
-        path = path.encode('utf-8')
-    encoded_path = urlparse.quote(path, safe='/')
-    url = "https://api.github.com/repos/%s/%s" % (REPO, encoded_path)
-    req = urllib.request.Request(url)
-    req.add_header("Accept", "application/vnd.github.v3+json")
-    req.add_header("User-Agent", "wallpaper-sync-bot")
-    resp = urllib.request.urlopen(req, timeout=30)
-    return json.loads(resp.read().decode('utf-8'))
-
-def get_latest(category):
+def get_latest(category, token=None):
     try:
         if category == "desktop":
             base = "preview/desktop"
@@ -47,16 +37,16 @@ def get_latest(category):
         else:
             return None
         
-        # 获取目录列表 - 需要编码
-        contents = gh_request(base)
+        # 获取目录列表
+        contents = gh_request("contents/" + base, token)
         latest = None
         latest_date = ""
         
         for item in contents:
             if item.get("type") != "dir":
                 continue
-            # 获取子目录 - 需要编码
-            sub = gh_request(item["path"])
+            # 获取子目录
+            sub = gh_request("contents/" + item["path"], token)
             for f in sub:
                 if f.get("type") != "file":
                     continue
@@ -67,19 +57,17 @@ def get_latest(category):
         
         if latest:
             name = latest.get("name", "").rsplit(".", 1)[0]
-            path = latest.get("path", "")
-            # 对路径进行URL编码
-            if isinstance(path, str):
-                path = path.encode('utf-8')
-            encoded = urlparse.quote(path, safe='/')
-            raw_url = "https://raw.githubusercontent.com/%s/main/%s" % (REPO, encoded)
-            return {"title": name, "url": raw_url}
+            # 使用 download_url，它已经是正确的 URL
+            url = latest.get("download_url", "")
+            return {"title": name, "url": url}
     except Exception as e:
         print("Error in %s: %s" % (category, e), flush=True)
     
     return None
 
 def main():
+    token = os.environ.get("GH_TOKEN", None)
+    
     print("同步壁纸数据...", flush=True)
     categories = {}
     
@@ -101,10 +89,10 @@ def main():
         print("Bing error: %s" % e, flush=True)
         categories["bing"] = None
     
-    # 其他分类
-    categories["desktop"] = get_latest("desktop")
-    categories["mobile"] = get_latest("mobile")
-    categories["avatar"] = get_latest("avatar")
+    # 其他分类 - 使用 GitHub Token
+    categories["desktop"] = get_latest("desktop", token)
+    categories["mobile"] = get_latest("mobile", token)
+    categories["avatar"] = get_latest("avatar", token)
     
     output = {
         "date": datetime.now().strftime("%Y-%m-%d"),
