@@ -15,7 +15,9 @@ else:
 REPO = "IT-NuanxinPro/nuanXinProPic"
 
 def gh_request(path):
-    url = "https://api.github.com/repos/%s/%s" % (REPO, path)
+    # 对路径进行URL编码
+    encoded_path = urlparse.quote(path)
+    url = "https://api.github.com/repos/%s/%s" % (REPO, encoded_path)
     req = urllib.request.Request(url)
     req.add_header("Accept", "application/vnd.github.v3+json")
     req.add_header("User-Agent", "wallpaper-sync-bot")
@@ -60,9 +62,7 @@ def get_latest(category):
         if latest:
             name = latest.get("name", "").rsplit(".", 1)[0]
             path = latest.get("path", "")
-            print("DEBUG: path=%s" % path, flush=True)
             encoded = encode_path(path)
-            print("DEBUG: encoded=%s" % encoded, flush=True)
             url = "https://raw.githubusercontent.com/%s/main/%s" % (REPO, encoded)
             return {"title": name, "url": url}
     except Exception as e:
