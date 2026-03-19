@@ -13,38 +13,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          # 获取数据
           DATA=$(curl -s "https://wallpaper-daily-iota.vercel.app/api/latest")
-          
           DESKTOP_TITLE=$(echo "$DATA" | jq -r '.categories.desktop.title')
           DESKTOP_URL=$(echo "$DATA" | jq -r '.categories.desktop.url')
           MOBILE_TITLE=$(echo "$DATA" | jq -r '.categories.mobile.title')
           MOBILE_URL=$(echo "$DATA" | jq -r '.categories.mobile.url')
           AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title')
           AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url')
-
-          # 构建 body
-          BODY="## 每日壁纸推荐
-
-### Desktop
-$DESKTOP_TITLE
-$DESKTOP_URL
-
-### Mobile
-$MOBILE_TITLE
-$MOBILE_URL
-
-### Avatar
-$AVATAR_TITLE
-$AVATAR_URL
-
-自动同步自 nuanXinProPic"
-
-          # 用 jq -Rs 转义
+          BODY="Desktop: $DESKTOP_TITLE $DESKTOP_URL Mobile: $MOBILE_TITLE $MOBILE_URL Avatar: $AVATAR_TITLE $AVATAR_URL"
           BODY_ESCAPED=$(echo "$BODY" | jq -Rs .)
-
-          # 发送到 GraphQL
-          curl -X POST https://api.github.com/graphql \
-            -H "Authorization: bearer $GH_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d "{\"query\": \"mutation { addDiscussionComment(input: { discussionId: \\\"D_kwDORQmU5s4Ak6V-\\\", body: $BODY_ESCAPED }) { comment { id } } }\"}"
+          curl -X POST https://api.github.com/graphql -H "Authorization: bearer $GH_TOKEN" -H "Content-Type: application/json" -d "{\"query\": \"mutation { addDiscussionComment(input: { discussionId: \\\"D_kwDORQmU5s4Ak6V-\\\", body: $BODY_ESCAPED }) { comment { id } } }\"}"
