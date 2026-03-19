@@ -14,23 +14,27 @@ else:
 
 REPO = "IT-NuanxinPro/nuanXinProPic"
 
-def gh_request(path):
-    # 对路径进行URL编码
-    encoded_path = urlparse.quote(path)
-    url = "https://api.github.com/repos/%s/%s" % (REPO, encoded_path)
+def gh_request_raw(path):
+    """原始请求，不编码"""
+    url = "https://api.github.com/repos/%s/%s" % (REPO, path)
     req = urllib.request.Request(url)
     req.add_header("Accept", "application/vnd.github.v3+json")
     req.add_header("User-Agent", "wallpaper-sync-bot")
     resp = urllib.request.urlopen(req, timeout=30)
     return json.loads(resp.read().decode('utf-8'))
 
-def encode_path(path):
-    parts = path.split('/')
-    encoded = []
-    for p in parts:
-        e = urlparse.quote(p, safe='')
-        encoded.append(e)
-    return '/'.join(encoded)
+def gh_request(path):
+    """带URL编码的请求"""
+    # 对路径进行UTF-8编码后再URL编码
+    if isinstance(path, str):
+        path = path.encode('utf-8')
+    encoded_path = urlparse.quote(path, safe='/')
+    url = "https://api.github.com/repos/%s/%s" % (REPO, encoded_path)
+    req = urllib.request.Request(url)
+    req.add_header("Accept", "application/vnd.github.v3+json")
+    req.add_header("User-Agent", "wallpaper-sync-bot")
+    resp = urllib.request.urlopen(req, timeout=30)
+    return json.loads(resp.read().decode('utf-8'))
 
 def get_latest(category):
     try:
@@ -43,14 +47,16 @@ def get_latest(category):
         else:
             return None
         
-        contents = gh_request("contents/" + base)
+        # 获取目录列表 - 需要编码
+        contents = gh_request(base)
         latest = None
         latest_date = ""
         
         for item in contents:
             if item.get("type") != "dir":
                 continue
-            sub = gh_request("contents/" + item["path"])
+            # 获取子目录 - 需要编码
+            sub = gh_request(item["path"])
             for f in sub:
                 if f.get("type") != "file":
                     continue
@@ -62,13 +68,14 @@ def get_latest(category):
         if latest:
             name = latest.get("name", "").rsplit(".", 1)[0]
             path = latest.get("path", "")
-            encoded = encode_path(path)
-            url = "https://raw.githubusercontent.com/%s/main/%s" % (REPO, encoded)
-            return {"title": name, "url": url}
+            # 对路径进行URL编码
+            if isinstance(path, str):
+                path = path.encode('utf-8')
+            encoded = urlparse.quote(path, safe='/')
+            raw_url = "https://raw.githubusercontent.com/%s/main/%s" % (REPO, encoded)
+            return {"title": name, "url": raw_url}
     except Exception as e:
         print("Error in %s: %s" % (category, e), flush=True)
-        import traceback
-        traceback.print_exc()
     
     return None
 
