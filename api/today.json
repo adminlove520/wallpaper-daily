@@ -1,11 +1,12 @@
 {
   "date": "2026-03-19",
-  "generatedAt": "2026-03-19T03:04:09.001718Z",
+  "generatedAt": "2026-03-19T03:09:31.818721Z",
+  "source": "https://wallpaper.061129.xyz",
   "categories": {
     "bing": {
       "title": "激发你的好奇心",
       "copyright": "澳洲针鼹，阿德莱德山，澳大利亚 (© Etienne Littlefair/naturepl.com)",
-      "date": "20260318",
+      "date": "2026-03-19",
       "urlbase": "/th?id=OHR.EchidnaAustralia_ZH-CN0913792118",
       "url_1920x1080": "https://www.bing.com/th?id=OHR.EchidnaAustralia_ZH-CN0913792118_1920x1080.jpg",
       "url_4k": "https://www.bing.com/th?id=OHR.EchidnaAustralia_ZH-CN0913792118_UHD.jpg"
@@ -13,6 +14,5 @@
     "desktop": null,
     "mobile": null,
     "avatar": null
-  },
-  "note": "Bing 每日自动更新。其他分类需要 wallpaper-gallery 网站支持 API。"
+  }
 }
