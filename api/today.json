@@ -1,6 +1,6 @@
 {
   "date": "2026-03-19",
-  "generatedAt": "2026-03-19T02:47:40.787413Z",
+  "generatedAt": "2026-03-19T02:53:47.104333Z",
   "categories": {
     "bing": {
       "title": "激发你的好奇心",
@@ -9,6 +9,10 @@
       "urlbase": "/th?id=OHR.EchidnaAustralia_ZH-CN0913792118",
       "url_1920x1080": "https://www.bing.com/th?id=OHR.EchidnaAustralia_ZH-CN0913792118_1920x1080.jpg",
       "url_4k": "https://www.bing.com/th?id=OHR.EchidnaAustralia_ZH-CN0913792118_UHD.jpg"
-    }
-  }
+    },
+    "desktop": null,
+    "mobile": null,
+    "avatar": null
+  },
+  "note": "Bing 每日自动更新。其他分类需要 wallpaper-gallery 网站支持 API。"
 }
