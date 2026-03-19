@@ -27,7 +27,7 @@ jobs:
           AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title // "未获取到"')
           AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url // "未获取到"')
 
-          # Create comment body - use simple format without markdown images
+          # Create comment body - use simple format
           COMMENT_BODY="每日壁纸推荐\n\n"
           COMMENT_BODY+="桌面壁纸\n"
           COMMENT_BODY+="标题: $DESKTOP_TITLE\n"
@@ -45,9 +45,11 @@ jobs:
           echo "Comment body:"
           echo "$COMMENT_BODY"
 
-          # Create GraphQL payload with proper escaping
-          # Use jq to ensure proper JSON encoding
-          PAYLOAD=$(jq -n --arg body "$COMMENT_BODY" '{"query": "mutation { addDiscussionComment(input: { discussionId: \"D_kwDORQmU5s4Ak6V-\", body: $body }) { comment { id } } }"}')
+          # Create GraphQL payload with proper variable declaration
+          PAYLOAD=$(jq -n --arg body "$COMMENT_BODY" '{
+            "query": "mutation AddDiscussionComment($body: String!) { addDiscussionComment(input: { discussionId: \"D_kwDORQmU5s4Ak6V-\", body: $body }) { comment { id } } }",
+            "variables": {"body": $body}
+          }')
 
           # Print payload for debugging
           echo "Payload:"
