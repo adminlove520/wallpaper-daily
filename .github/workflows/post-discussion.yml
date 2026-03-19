@@ -20,28 +20,25 @@ jobs:
           echo "AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url // empty')" >> $GITHUB_ENV
           echo "DATE=$(date '+%Y-%m-%d')" >> $GITHUB_ENV
 
-      - name: 发帖到 Discussion
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          BODY="## 📅 每日壁纸推荐 ${{ env.DATE }}
+      - name: 发评论到 Discussion
+        uses: wesleyscholl/create-discussion-comment@v1.0.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          discussion-id: "D_kwDORQmU5s4Ak6V-"
+          body: |
+            ## 📅 每日壁纸推荐 ${{ env.DATE }}
 
-          ### 🖥️ Desktop
-          **${{ env.DESKTOP_TITLE }}**
-          ![Desktop](${{ env.DESKTOP_URL }})
+            ### 🖥️ Desktop
+            **${{ env.DESKTOP_TITLE }}**
+            ![Desktop](${{ env.DESKTOP_URL }})
 
-          ### 📱 Mobile
-          **${{ env.MOBILE_TITLE }}**
-          ![Mobile](${{ env.MOBILE_URL }})
+            ### 📱 Mobile
+            **${{ env.MOBILE_TITLE }}**
+            ![Mobile](${{ env.MOBILE_URL }})
 
-          ### 🧑‍🎤 Avatar
-          **${{ env.AVATAR_TITLE }}**
-          ![Avatar](${{ env.AVATAR_URL }})
+            ### 🧑‍🎤 Avatar
+            **${{ env.AVATAR_TITLE }}**
+            ![Avatar](${{ env.AVATAR_URL }})
 
-          ---
-          *自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*"
-
-          # 用 gh api 发评论
-          gh api https://api.github.com/repos/ythx-101/openclaw-qa/discussions/132/comments \
-            -X POST \
-            -F body="$BODY"
+            ---
+            *自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*
