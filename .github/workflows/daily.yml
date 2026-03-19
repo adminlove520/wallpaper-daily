@@ -1,0 +1,33 @@
+name: 每日壁纸同步
+
+on:
+  schedule:
+    # 每天 10:00 UTC 运行 (= 18:00 北京时间)
+    - cron: '0 10 * * *'
+  workflow_dispatch:  # 支持手动触发
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: 运行同步脚本
+        run: |
+          python scripts/sync.py
+          
+      - name: 提交更改
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: 更新每日壁纸数据 $(date '+%Y-%m-%d')"
+          file_pattern: "api/*.json"
