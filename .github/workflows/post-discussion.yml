@@ -23,34 +23,28 @@ jobs:
           AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title')
           AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url')
 
-          # 构建 body，用 jq -Rs 转义
-          BODY=$(cat << 'ENDMARKER'
-## 📅 每日壁纸推荐
-### 🖥️ Desktop
-DESKTOP_TITLE_PLACEHOLDER
-DESKTOP_URL_PLACEHOLDER
+          # 构建 body
+          BODY="## 每日壁纸推荐
 
-### 📱 Mobile
-MOBILE_TITLE_PLACEHOLDER
-MOBILE_URL_PLACEHOLDER
+### Desktop
+$DESKTOP_TITLE
+$DESKTOP_URL
 
-### 🧑‍🎤 Avatar
-AVATAR_TITLE_PLACEHOLDER
-AVATAR_URL_PLACEHOLDER
+### Mobile
+$MOBILE_TITLE
+$MOBILE_URL
 
----
-*自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*
-ENDMARKER
-          | sed "s/DESKTOP_TITLE_PLACEHOLDER/**$DESKTOP_TITLE**/g" \
-          | sed "s|DESKTOP_URL_PLACEHOLDER|![Desktop]($DESKTOP_URL)|g" \
-          | sed "s/MOBILE_TITLE_PLACEHOLDER/**$MOBILE_TITLE**/g" \
-          | sed "s|MOBILE_URL_PLACEHOLDER|![Mobile]($MOBILE_URL)|g" \
-          | sed "s/AVATAR_TITLE_PLACEHOLDER/**$AVATAR_TITLE**/g" \
-          | sed "s|AVATAR_URL_PLACEHOLDER|![Avatar]($AVATAR_URL)|g" \
-          | jq -Rs .)
+### Avatar
+$AVATAR_TITLE
+$AVATAR_URL
+
+自动同步自 nuanXinProPic"
+
+          # 用 jq -Rs 转义
+          BODY_ESCAPED=$(echo "$BODY" | jq -Rs .)
 
           # 发送到 GraphQL
           curl -X POST https://api.github.com/graphql \
             -H "Authorization: bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
-            -d "{\"query\": \"mutation { addDiscussionComment(input: { discussionId: \\\"D_kwDORQmU5s4Ak6V-\\\", body: $BODY }) { comment { id } } }\"}"
+            -d "{\"query\": \"mutation { addDiscussionComment(input: { discussionId: \\\"D_kwDORQmU5s4Ak6V-\\\", body: $BODY_ESCAPED }) { comment { id } } }\"}"
