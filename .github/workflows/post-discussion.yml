@@ -9,26 +9,44 @@ jobs:
   post:
     runs-on: ubuntu-latest
     steps:
-      - name: 获取最新壁纸数据
-        run: |
-          DATA=$(curl -s "https://wallpaper-daily-iota.vercel.app/api/latest")
-          echo "DESKTOP_TITLE=$(echo "$DATA" | jq -r '.categories.desktop.title // empty')" >> $GITHUB_ENV
-          echo "DESKTOP_URL=$(echo "$DATA" | jq -r '.categories.desktop.url // empty')" >> $GITHUB_ENV
-          echo "MOBILE_TITLE=$(echo "$DATA" | jq -r '.categories.mobile.title // empty')" >> $GITHUB_ENV
-          echo "MOBILE_URL=$(echo "$DATA" | jq -r '.categories.mobile.url // empty')" >> $GITHUB_ENV
-          echo "AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title // empty')" >> $GITHUB_ENV
-          echo "AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url // empty')" >> $GITHUB_ENV
-          echo "DATE=$(date '+%Y-%m-%d')" >> $GITHUB_ENV
-
-      - name: 发评论到 Discussion
+      - name: 获取壁纸并发送评论
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          # 构建 body，用 \\n 换行
-          BODY="## 📅 每日壁纸推荐 ${{ env.DATE }}\n\n### 🖥️ Desktop\n**${{ env.DESKTOP_TITLE }}**\n![Desktop](${{ env.DESKTOP_URL }})\n\n### 📱 Mobile\n**${{ env.MOBILE_TITLE }}**\n![Mobile](${{ env.MOBILE_URL }})\n\n### 🧑‍🎤 Avatar\n**${{ env.AVATAR_TITLE }}**\n![Avatar](${{ env.AVATAR_URL }})\n\n---\n*自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*"
+          # 获取数据
+          DATA=$(curl -s "https://wallpaper-daily-iota.vercel.app/api/latest")
+          
+          DESKTOP_TITLE=$(echo "$DATA" | jq -r '.categories.desktop.title')
+          DESKTOP_URL=$(echo "$DATA" | jq -r '.categories.desktop.url')
+          MOBILE_TITLE=$(echo "$DATA" | jq -r '.categories.mobile.title')
+          MOBILE_URL=$(echo "$DATA" | jq -r '.categories.mobile.url')
+          AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title')
+          AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url')
+          DATE=$(date '+%Y-%m-%d')
 
-          # 发 GraphQL mutation
+          # 用 jq -Rs 生成带 \n 的 JSON 字符串
+          BODY=$(jq -Rs << EOF
+## 📅 每日壁纸推荐 $DATE
+
+### 🖥️ Desktop
+**$DESKTOP_TITLE**
+![Desktop]($DESKTOP_URL)
+
+### 📱 Mobile
+**$MOBILE_TITLE**
+![Mobile]($MOBILE_URL)
+
+### 🧑‍🎤 Avatar
+**$AVATAR_TITLE**
+![Avatar]($AVATAR_URL)
+
+---
+*自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*
+EOF
+)
+
+          # 发送到 GraphQL
           curl -X POST https://api.github.com/graphql \
-            -H "Authorization: bearer ${{ env.GH_TOKEN }}" \
+            -H "Authorization: bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
-            -d "{\"query\": \"mutation { addDiscussionComment(input: { discussionId: \\\"D_kwDORQmU5s4Ak6V-\\\", body: \\\"$BODY\\\" }) { comment { id } } }\"}"
+            -d "{\"query\": \"mutation { addDiscussionComment(input: { discussionId: \\\"D_kwDORQmU5s4Ak6V-\\\", body: $BODY }) { comment { id } } }\"}"
