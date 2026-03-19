@@ -7,70 +7,55 @@ import json
 import urllib.request
 from datetime import datetime
 
-if sys.version_info[0] >= 3:
-    import urllib.parse as urlparse
-else:
-    import urllib as urlparse
-
 REPO = "IT-NuanxinPro/nuanXinProPic"
 
-# 确保输出是 UTF-8
-if sys.version_info[0] >= 3:
-    pass
-else:
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
-
-def gh_tree(path, token=None):
-    """使用 GitHub Tree API 获取文件列表"""
-    # 使用 tree API 获取整个树
-    url = "https://api.github.com/repos/%s/git/trees/main?recursive=1" % REPO
-    req = urllib.request.Request(url)
-    req.add_header("Accept", "application/vnd.github.v3+json")
-    if token:
-        req.add_header("Authorization", "token %s" % token)
-    resp = urllib.request.urlopen(req, timeout=30)
-    return json.loads(resp.read().decode('utf-8'))
-
-def get_latest_by_prefix(prefix, token=None):
-    """获取指定前缀目录下的最新文件"""
+def get_latest_from_metadata(category):
+    """从 metadata JSON 获取最新图片"""
     try:
-        data = gh_tree("", token)
-        tree = data.get("tree", [])
-        
-        # 找到匹配的文件
-        files = []
-        for item in tree:
-            if item.get("type") == "blob" and item["path"].startswith(prefix):
-                files.append(item)
-        
-        if not files:
+        if category == "desktop":
+            meta_file = "desktop.json"
+        elif category == "mobile":
+            meta_file = "mobile.json"
+        elif category == "avatar":
+            meta_file = "avatar.json"
+        else:
             return None
         
-        # 按路径排序，取最新的
-        files.sort(key=lambda x: x.get("sha", ""), reverse=True)
-        latest = files[0]
+        meta_url = "https://raw.githubusercontent.com/%s/main/metadata/%s" % (REPO, meta_file)
+        req = urllib.request.Request(meta_url)
+        resp = urllib.request.urlopen(req, timeout=30)
+        data = json.loads(resp.read().decode('utf-8'))
         
-        name = os.path.basename(latest["path"])
-        title = name.rsplit(".", 1)[0] if "." in name else name
+        images = data.get("images", {})
+        if not images:
+            return None
         
-        # 构建 raw URL
-        url = "https://raw.githubusercontent.com/%s/main/%s" % (REPO, latest["path"])
+        sorted_images = sorted(
+            images.items(),
+            key=lambda x: x[1].get("createdAt", ""),
+            reverse=True
+        )
+        
+        first_path, info = sorted_images[0]
+        
+        cdn_tag = info.get("cdnTag", "")
+        wallpaper_path = first_path
+        
+        url = "https://cdn.jsdelivr.net/gh/%s@%s/%s" % (REPO, cdn_tag, wallpaper_path)
+        
+        filename = info.get("filename", "")
+        title = filename.rsplit(".", 1)[0] if filename else first_path
         
         return {"title": title, "url": url}
+        
     except Exception as e:
-        print("Error in %s: %s" % (prefix, e), flush=True)
-        import traceback
-        traceback.print_exc()
+        print("Error in %s: %s" % (category, e), flush=True)
         return None
 
 def main():
-    token = os.environ.get("GH_TOKEN", None)
-    
     print("同步壁纸数据...", flush=True)
     categories = {}
     
-    # Bing
     try:
         req = urllib.request.Request("https://wallpaper.061129.xyz/data/bing/latest.json")
         req.add_header("User-Agent", "wallpaper-sync-bot")
@@ -88,14 +73,9 @@ def main():
         print("Bing error: %s" % e, flush=True)
         categories["bing"] = None
     
-    # Desktop
-    categories["desktop"] = get_latest_by_prefix("preview/desktop/", token)
-    
-    # Mobile
-    categories["mobile"] = get_latest_by_prefix("preview/mobile/", token)
-    
-    # Avatar
-    categories["avatar"] = get_latest_by_prefix("wallpaper/avatar/", token)
+    categories["desktop"] = get_latest_from_metadata("desktop")
+    categories["mobile"] = get_latest_from_metadata("mobile")
+    categories["avatar"] = get_latest_from_metadata("avatar")
     
     output = {
         "date": datetime.now().strftime("%Y-%m-%d"),
