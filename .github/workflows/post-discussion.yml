@@ -22,7 +22,7 @@ jobs:
 
       - name: 发帖到 Discussion
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           cat << 'MARKDOWN' > body.md
           ## 📅 每日壁纸推荐 ${{ env.DATE }}
