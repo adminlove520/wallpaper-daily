@@ -7,9 +7,6 @@
 | 接口 | 地址 |
 |------|------|
 | 今日所有壁纸 | `https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/today.json` |
-| 桌面壁纸 | `https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/desktop.json` |
-| 手机壁纸 | `https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/mobile.json` |
-| 头像 | `https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/avatar.json` |
 
 ## 数据格式
 
@@ -20,19 +17,42 @@
   "categories": {
     "bing": {
       "title": "激发你的好奇心",
-      "copyright": "澳洲针鼹，阿德莱德山，澳大利亚",
-      "url": "https://www.bing.com/th?id=OHR.xxx_1920x1080.jpg"
+      "url_1920x1080": "https://www.bing.com/th?id=OHR.xxx_1920x1080.jpg",
+      "url_4k": "https://www.bing.com/th?id=OHR.xxx_UHD.jpg"
     },
-    "desktop": {
-      "title": "彩虹发色的梦幻少女仰望星空",
-      "category": "动漫/二次元",
-      "url": "https://cdn.jsdelivr.net/gh/..."
-    }
-  }
+    "desktop": null,
+    "mobile": null,
+    "avatar": null
+  },
+  "note": "Bing 每日自动更新。其他分类需要 wallpaper-gallery 网站支持 API。"
 }
 ```
 
 ## 自动同步
 
 - 每天 10:00 UTC 自动从 Bing API 获取最新数据
-- 同时更新所有分类的最新壁纸链接
+- 同时更新 `api/today.json`
+
+## 其他分类说明
+
+当前支持：
+- ✅ Bing 每日壁纸（自动）
+
+待支持（需要 wallpaper-gallery 网站 API）：
+- ⏳ 电脑壁纸 (desktop)
+- ⏳ 手机壁纸 (mobile)  
+- ⏳ 头像 (avatar)
+
+## 本地开发
+
+```bash
+# 安装依赖
+pip install -r requirements.txt
+
+# 运行同步脚本
+python scripts/sync.py
+```
+
+## 贡献
+
+欢迎提交 Issue 和 PR！
