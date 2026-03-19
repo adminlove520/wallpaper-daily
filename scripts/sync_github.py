@@ -10,7 +10,7 @@ from datetime import datetime
 REPO = "IT-NuanxinPro/nuanXinProPic"
 
 def get_latest_from_metadata(category):
-    """从 metadata JSON 获取最新图片"""
+    """从 metadata JSON 获取最新图片，直接用 @latest"""
     try:
         if category == "desktop":
             meta_file = "desktop.json"
@@ -21,7 +21,8 @@ def get_latest_from_metadata(category):
         else:
             return None
         
-        meta_url = "https://raw.githubusercontent.com/%s/main/metadata/%s" % (REPO, meta_file)
+        # 直接用 @latest
+        meta_url = "https://cdn.jsdelivr.net/gh/%s@latest/metadata/%s" % (REPO, meta_file)
         req = urllib.request.Request(meta_url)
         resp = urllib.request.urlopen(req, timeout=30)
         data = json.loads(resp.read().decode('utf-8'))
@@ -38,11 +39,10 @@ def get_latest_from_metadata(category):
         
         first_path, info = sorted_images[0]
         
-        cdn_tag = info.get("cdnTag", "")
-        wallpaper_path = first_path
+        # 直接用 @latest
+        url = "https://cdn.jsdelivr.net/gh/%s@latest/%s" % (REPO, first_path)
         
-        url = "https://cdn.jsdelivr.net/gh/%s@%s/%s" % (REPO, cdn_tag, wallpaper_path)
-        
+        # title 用 filename
         filename = info.get("filename", "")
         title = filename.rsplit(".", 1)[0] if filename else first_path
         
@@ -54,8 +54,10 @@ def get_latest_from_metadata(category):
 
 def main():
     print("同步壁纸数据...", flush=True)
+    
     categories = {}
     
+    # Bing
     try:
         req = urllib.request.Request("https://wallpaper.061129.xyz/data/bing/latest.json")
         req.add_header("User-Agent", "wallpaper-sync-bot")
@@ -73,6 +75,7 @@ def main():
         print("Bing error: %s" % e, flush=True)
         categories["bing"] = None
     
+    # 其他分类 - 全部用 @latest
     categories["desktop"] = get_latest_from_metadata("desktop")
     categories["mobile"] = get_latest_from_metadata("mobile")
     categories["avatar"] = get_latest_from_metadata("avatar")
