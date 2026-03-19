@@ -13,13 +13,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
+          # 安装 Python
+          sudo apt-get update -qq && sudo apt-get install -y -qq python3
+
+          # 获取数据
           DATA=$(curl -s "https://wallpaper-daily-iota.vercel.app/api/latest")
-          DESKTOP_TITLE=$(echo "$DATA" | jq -r '.categories.desktop.title')
-          DESKTOP_URL=$(echo "$DATA" | jq -r '.categories.desktop.url')
-          MOBILE_TITLE=$(echo "$DATA" | jq -r '.categories.mobile.title')
-          MOBILE_URL=$(echo "$DATA" | jq -r '.categories.mobile.url')
-          AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title')
-          AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url')
+          
+          # 用 Python 提取数据
+          DESKTOP_TITLE=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['desktop']['title'])")
+          DESKTOP_URL=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['desktop']['url'])")
+          MOBILE_TITLE=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['mobile']['title'])")
+          MOBILE_URL=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['mobile']['url'])")
+          AVATAR_TITLE=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['avatar']['title'])")
+          AVATAR_URL=$(python3 -c "import sys,json; d=json.loads('$DATA'); print(d['categories']['avatar']['url'])")
+
+          # 构建 body
           BODY="Desktop: $DESKTOP_TITLE $DESKTOP_URL Mobile: $MOBILE_TITLE $MOBILE_URL Avatar: $AVATAR_TITLE $AVATAR_URL"
-          BODY_ESCAPED=$(echo "$BODY" | jq -Rs .)
-          curl -X POST https://api.github.com/graphql -H "Authorization: bearer $GH_TOKEN" -H "Content-Type: application/json" -d "{\"query\": \"mutation { addDiscussionComment(input: { discussionId: \\\"D_kwDORQmU5s4Ak6V-\\\", body: $BODY_ESCAPED }) { comment { id } } }\"}"
+
+          # 用 Python 生成 JSON
+          PAYLOAD=$(python3 -c "import json; print(json.dumps({'query': 'mutation { addDiscussionComment(input: { discussionId: \"D_kwDORQmU5s4Ak6V-\", body: \"$BODY\" }) { comment { id } } }'}))")
+
+          # 发送
+          curl -X POST https://api.github.com/graphql -H "Authorization: bearer $GH_TOKEN" -H "Content-Type: application/json" -d "$PAYLOAD"
