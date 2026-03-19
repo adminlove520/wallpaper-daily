@@ -22,37 +22,41 @@ jobs:
           AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title')
           AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url')
 
-          # 手动拼接 JSON body
-          python3 << PYEOF
-import json
-import os
-
-body = f"""## 📅 每日壁纸推荐
+          # 用 heredoc 构建 body，注意换行用 \n
+          BODY=$(cat << 'ENDBODY'
+## 📅 每日壁纸推荐
 
 ### 🖥️ Desktop
-**{os.environ['DESKTOP_TITLE']}**
-![Desktop]({os.environ['DESKTOP_URL']})
+DESKTOP_TITLE_PLACEHOLDER
+DESKTOP_URL_PLACEHOLDER
 
 ### 📱 Mobile
-**{os.environ['MOBILE_TITLE']}**
-![Mobile]({os.environ['MOBILE_URL']})
+MOBILE_TITLE_PLACEHOLDER
+MOBILE_URL_PLACEHOLDER
 
 ### 🧑‍🎤 Avatar
-**{os.environ['AVATAR_TITLE']}**
-![Avatar]({os.environ['AVATAR_URL']})
+AVATAR_TITLE_PLACEHOLDER
+AVATAR_URL_PLACEHOLDER
 
 ---
-*自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*"""
+*自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*
+ENDBODY
+          )
 
-query = f'mutation {{ addDiscussionComment(input: {{ discussionId: "D_kwDORQmU5s4Ak6V-", body: """{body}""" }}) {{ comment {{ id }} }} }}'
+          # 替换变量
+          BODY="${BODY//DESKTOP_TITLE_PLACEHOLDER/**$DESKTOP_TITLE**}"
+          BODY="${BODY//DESKTOP_URL_PLACEHOLDER/![Desktop]($DESKTOP_URL)}"
+          BODY="${BODY//MOBILE_TITLE_PLACEHOLDER/**$MOBILE_TITLE**}"
+          BODY="${BODY//MOBILE_URL_PLACEHOLDER/![Mobile]($MOBILE_URL)}"
+          BODY="${BODY//AVATAR_TITLE_PLACEHOLDER/**$AVATAR_TITLE**}"
+          BODY="${BODY//AVATAR_URL_PLACEHOLDER/![Avatar]($AVATAR_URL)}"
 
-payload = json.dumps({"query": query})
-print(payload)
-PYEOF
+          # 转义 JSON
+          BODY_ESCAPED=$(echo "$BODY" | jq -Rs .)
 
-          > payload.json
-
-          curl -X POST https://api.github.com/graphql \
-            -H "Authorization: bearer $GH_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d @payload.json
+          # 用 REST API 发到 openclaw-qa 仓库
+          curl -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/ythx-101/openclaw-qa/discussions/132/comments" \
+            -d "{\"body\": $BODY_ESCAPED}"
