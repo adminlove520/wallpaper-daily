@@ -2,7 +2,6 @@ name: Post to Discussion
 
 on:
   schedule:
-    # 每天 UTC 10:00 (北京 18:00) 运行
     - cron: '0 10 * * *'
   workflow_dispatch:
 
@@ -12,66 +11,35 @@ jobs:
     steps:
       - name: 获取最新壁纸数据
         run: |
-          # 获取最新数据
           DATA=$(curl -s "https://wallpaper-daily-iota.vercel.app/api/latest")
           
-          # 解析各类别
-          BING_TITLE=$(echo "$DATA" | jq -r '.categories.bing.title // empty')
-          BING_URL=$(echo "$DATA" | jq -r '.categories.bing.url // empty')
-          
-          DESKTOP_TITLE=$(echo "$DATA" | jq -r '.categories.desktop.title // empty')
-          DESKTOP_URL=$(echo "$DATA" | jq -r '.categories.desktop.url // empty')
-          
-          MOBILE_TITLE=$(echo "$DATA" | jq -r '.categories.mobile.title // empty')
-          MOBILE_URL=$(echo "$DATA" | jq -r '.categories.mobile.url // empty')
-          
-          AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title // empty')
-          AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url // empty')
-          
-          echo "BING_TITLE=$BING_TITLE" >> $GITHUB_ENV
-          echo "BING_URL=$BING_URL" >> $GITHUB_ENV
-          echo "DESKTOP_TITLE=$DESKTOP_TITLE" >> $GITHUB_ENV
-          echo "DESKTOP_URL=$DESKTOP_URL" >> $GITHUB_ENV
-          echo "MOBILE_TITLE=$MOBILE_TITLE" >> $GITHUB_ENV
-          echo "MOBILE_URL=$MOBILE_URL" >> $GITHUB_ENV
-          echo "AVATAR_TITLE=$AVATAR_TITLE" >> $GITHUB_ENV
-          echo "AVATAR_URL=$AVATAR_URL" >> $GITHUB_ENV
+          echo "DESKTOP_TITLE=$(echo "$DATA" | jq -r '.categories.desktop.title // empty')" >> $GITHUB_ENV
+          echo "DESKTOP_URL=$(echo "$DATA" | jq -r '.categories.desktop.url // empty')" >> $GITHUB_ENV
+          echo "MOBILE_TITLE=$(echo "$DATA" | jq -r '.categories.mobile.title // empty')" >> $GITHUB_ENV
+          echo "MOBILE_URL=$(echo "$DATA" | jq -r '.categories.mobile.url // empty')" >> $GITHUB_ENV
+          echo "AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title // empty')" >> $GITHUB_ENV
+          echo "AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url // empty')" >> $GITHUB_ENV
+          echo "DATE=$(date '+%Y-%m-%d')" >> $GITHUB_ENV
 
       - name: 发帖到 Discussion
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          REPO: ${{ github.repository }}
         run: |
-          # 构建 markdown 内容
-          BODY="## 📅 每日壁纸推荐 $(date '+%Y-%m-%d')
-          
-### 🖥️ Desktop
-**$DESKTOP_TITLE**
-![Desktop]($DESKTOP_URL)
+          BODY="## 📅 每日壁纸推荐 ${{ env.DATE }}
 
-### 📱 Mobile  
-**$MOBILE_TITLE**
-![Mobile]($MOBILE_URL)
+### 🖥️ Desktop
+**${{ env.DESKTOP_TITLE }}**
+![Desktop](${{ env.DESKTOP_URL }})
+
+### 📱 Mobile
+**${{ env.MOBILE_TITLE }}**
+![Mobile](${{ env.MOBILE_URL }})
 
 ### 🧑‍🎤 Avatar
-**$AVATAR_TITLE**
-![Avatar]($AVATAR_URL)
+**${{ env.AVATAR_TITLE }}**
+![Avatar](${{ env.AVATAR_URL }})
 
 ---
 *自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*"
 
-          # 发帖到 discussion #132
-          gh api graphql -f query='
-            mutation {
-              addDiscussionComment(
-                input: {
-                  discussionId: "D_kwDORQmU5s4Ak6V-",
-                  body: '"'"'$BODY'"'"'
-                }
-              ) {
-                comment {
-                  id
-                }
-              }
-            }
-          '
+          gh api graphql -f query="mutation { addDiscussionComment(input: { discussionId: \"D_kwDORQmU5s4Ak6V-\", body: \"$BODY\" }) { comment { id } } }"
