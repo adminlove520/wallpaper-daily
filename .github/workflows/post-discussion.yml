@@ -22,28 +22,32 @@ jobs:
           MOBILE_URL=$(echo "$DATA" | jq -r '.categories.mobile.url')
           AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title')
           AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url')
-          DATE=$(date '+%Y-%m-%d')
 
-          # 用 jq -Rs 生成带 \n 的 JSON 字符串
-          BODY=$(jq -Rs << EOF
-## 📅 每日壁纸推荐 $DATE
-
+          # 构建 body，用 jq -Rs 转义
+          BODY=$(cat << 'ENDMARKER'
+## 📅 每日壁纸推荐
 ### 🖥️ Desktop
-**$DESKTOP_TITLE**
-![Desktop]($DESKTOP_URL)
+DESKTOP_TITLE_PLACEHOLDER
+DESKTOP_URL_PLACEHOLDER
 
 ### 📱 Mobile
-**$MOBILE_TITLE**
-![Mobile]($MOBILE_URL)
+MOBILE_TITLE_PLACEHOLDER
+MOBILE_URL_PLACEHOLDER
 
 ### 🧑‍🎤 Avatar
-**$AVATAR_TITLE**
-![Avatar]($AVATAR_URL)
+AVATAR_TITLE_PLACEHOLDER
+AVATAR_URL_PLACEHOLDER
 
 ---
 *自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*
-EOF
-)
+ENDMARKER
+          | sed "s/DESKTOP_TITLE_PLACEHOLDER/**$DESKTOP_TITLE**/g" \
+          | sed "s|DESKTOP_URL_PLACEHOLDER|![Desktop]($DESKTOP_URL)|g" \
+          | sed "s/MOBILE_TITLE_PLACEHOLDER/**$MOBILE_TITLE**/g" \
+          | sed "s|MOBILE_URL_PLACEHOLDER|![Mobile]($MOBILE_URL)|g" \
+          | sed "s/AVATAR_TITLE_PLACEHOLDER/**$AVATAR_TITLE**/g" \
+          | sed "s|AVATAR_URL_PLACEHOLDER|![Avatar]($AVATAR_URL)|g" \
+          | jq -Rs .)
 
           # 发送到 GraphQL
           curl -X POST https://api.github.com/graphql \
