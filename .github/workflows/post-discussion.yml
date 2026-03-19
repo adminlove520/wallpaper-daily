@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 获取壁纸并发送评论
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
+          # 获取数据
           DATA=$(curl -s "https://wallpaper-daily-iota.vercel.app/api/latest")
+          
           DESKTOP_TITLE=$(echo "$DATA" | jq -r '.categories.desktop.title')
           DESKTOP_URL=$(echo "$DATA" | jq -r '.categories.desktop.url')
           MOBILE_TITLE=$(echo "$DATA" | jq -r '.categories.mobile.title')
@@ -21,23 +21,13 @@ jobs:
           AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title')
           AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url')
 
-          BODY="## 每日壁纸推荐
+          # 用 gh api graphql（和之前成功的一样）
+          gh api graphql -f query='mutation { addDiscussionComment(input: { discussionId: "D_kwDORQmU5s4Ak6V-", body: "## 每日壁纸推荐
 
-Desktop: $DESKTOP_TITLE
-$DESKTOP_URL
+Desktop: '"$DESKTOP_TITLE"' '"$DESKTOP_URL"'
 
-Mobile: $MOBILE_TITLE
-$MOBILE_URL
+Mobile: '"$MOBILE_TITLE"' '"$MOBILE_URL"'
 
-Avatar: $AVATAR_TITLE
-$AVATAR_URL
+Avatar: '"$AVATAR_TITLE"' '"$AVATAR_URL"'
 
-自动同步自 nuanXinProPic"
-
-          BODY_ESCAPED=$(echo "$BODY" | jq -Rs .)
-
-          curl -X POST \
-            -H "Authorization: token $GH_TOKEN" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/ythx-101/openclaw-qa/discussions/132/comments" \
-            -d "{\"body\": $BODY_ESCAPED}"
+自动同步自 nuanXinProPic" }) { comment { id } } }'
