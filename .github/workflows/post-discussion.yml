@@ -12,7 +12,6 @@ jobs:
       - name: 获取最新壁纸数据
         run: |
           DATA=$(curl -s "https://wallpaper-daily-iota.vercel.app/api/latest")
-          
           echo "DESKTOP_TITLE=$(echo "$DATA" | jq -r '.categories.desktop.title // empty')" >> $GITHUB_ENV
           echo "DESKTOP_URL=$(echo "$DATA" | jq -r '.categories.desktop.url // empty')" >> $GITHUB_ENV
           echo "MOBILE_TITLE=$(echo "$DATA" | jq -r '.categories.mobile.title // empty')" >> $GITHUB_ENV
@@ -25,21 +24,24 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          BODY="## 📅 每日壁纸推荐 ${{ env.DATE }}
+          cat << 'MARKDOWN' > body.md
+          ## 📅 每日壁纸推荐 ${{ env.DATE }}
 
-### 🖥️ Desktop
-**${{ env.DESKTOP_TITLE }}**
-![Desktop](${{ env.DESKTOP_URL }})
+          ### 🖥️ Desktop
+          **${{ env.DESKTOP_TITLE }}**
+          ![Desktop](${{ env.DESKTOP_URL }})
 
-### 📱 Mobile
-**${{ env.MOBILE_TITLE }}**
-![Mobile](${{ env.MOBILE_URL }})
+          ### 📱 Mobile
+          **${{ env.MOBILE_TITLE }}**
+          ![Mobile](${{ env.MOBILE_URL }})
 
-### 🧑‍🎤 Avatar
-**${{ env.AVATAR_TITLE }}**
-![Avatar](${{ env.AVATAR_URL }})
+          ### 🧑‍🎤 Avatar
+          **${{ env.AVATAR_TITLE }}**
+          ![Avatar](${{ env.AVATAR_URL }})
 
----
-*自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*"
+          ---
+          *自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*
+          MARKDOWN
 
-          gh api graphql -f query="mutation { addDiscussionComment(input: { discussionId: \"D_kwDORQmU5s4Ak6V-\", body: \"$BODY\" }) { comment { id } } }"
+          BODY=$(cat body.md | jq -Rs .)
+          gh api graphql -f query="mutation { addDiscussionComment(input: { discussionId: \"D_kwDORQmU5s4Ak6V-\", body: $BODY }) { comment { id } } }"
