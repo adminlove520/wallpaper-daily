@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-壁纸数据同步脚本 v3
+壁纸数据同步脚本 v4
 从 wallpaper.061129.xyz CDN 获取最新壁纸数据
 """
 
@@ -49,11 +49,11 @@ def generate_today_json(bing_data):
         "source": "https://wallpaper.061129.xyz",
         "categories": {
             "bing": bing_data,
-            # TODO: 其他分类需要单独获取
             "desktop": None,
             "mobile": None,
             "avatar": None
-        }
+        },
+        "note": "Bing 可用。其他分类需要 wallpaper-gallery 网站添加公开 API。"
     }
     
     return result
@@ -68,7 +68,7 @@ def save_json(data, filename):
 
 def main():
     print("=" * 50)
-    print("壁纸数据同步 v3 (使用 CDN)")
+    print("壁纸数据同步 v4")
     print("=" * 50)
     
     # 获取 Bing 壁纸
