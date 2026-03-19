@@ -1,0 +1,16 @@
+name: 测试 CDN 访问
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 测试 Bing
+        run: |
+          curl -s "https://wallpaper.061129.xyz/data/bing/latest.json" | head -c 200
+          
+      - name: 测试 Desktop
+        run: |
+          curl -s "https://wallpaper.061129.xyz/data/desktop/latest.json" | head -c 200
