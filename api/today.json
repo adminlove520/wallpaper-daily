@@ -1,19 +1,16 @@
 {
   "date": "2026-03-19",
-  "generatedAt": "2026-03-19T03:21:15.222726Z",
-  "source": "https://wallpaper.061129.xyz",
+  "generatedAt": "2026-03-19T03:38:00Z",
   "categories": {
     "bing": {
       "title": "激发你的好奇心",
-      "copyright": "澳洲针鼹，阿德莱德山，澳大利亚 (© Etienne Littlefair/naturepl.com)",
-      "date": "2026-03-19",
-      "urlbase": "/th?id=OHR.EchidnaAustralia_ZH-CN0913792118",
-      "url_1920x1080": "https://www.bing.com/th?id=OHR.EchidnaAustralia_ZH-CN0913792118_1920x1080.jpg",
-      "url_4k": "https://www.bing.com/th?id=OHR.EchidnaAustralia_ZH-CN0913792118_UHD.jpg"
+      "url_1920x1080": "https://www.bing.com/th?id=OHR.EchidnaAustralia_ZH-CN0913792118_1920x1080.jpg"
     },
-    "desktop": null,
+    "desktop": {
+      "title": "彩虹发色的梦幻少女仰望星空",
+      "url": "https://cdn.jsdelivr.net/gh/IT-NuanxinPro/nuanXinProPic@main/preview/desktop/动漫/彩虹发色的梦幻少女仰望星空.png"
+    },
     "mobile": null,
     "avatar": null
-  },
-  "note": "Bing 可用。其他分类需要 wallpaper-gallery 网站添加公开 API。"
+  }
 }
