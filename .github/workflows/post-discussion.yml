@@ -8,6 +8,9 @@ on:
 jobs:
   post:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      discussions: write
     steps:
       - name: 获取最新壁纸数据
         run: |
