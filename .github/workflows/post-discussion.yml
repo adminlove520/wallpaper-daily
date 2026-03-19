@@ -8,10 +8,6 @@ on:
 jobs:
   post:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      discussions: write
-      pull-requests: write
     steps:
       - name: 获取最新壁纸数据
         run: |
@@ -26,10 +22,9 @@ jobs:
 
       - name: 发帖到 Discussion
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          cat << 'MARKDOWN' > body.md
-          ## 📅 每日壁纸推荐 ${{ env.DATE }}
+          BODY="## 📅 每日壁纸推荐 ${{ env.DATE }}
 
           ### 🖥️ Desktop
           **${{ env.DESKTOP_TITLE }}**
@@ -44,8 +39,9 @@ jobs:
           ![Avatar](${{ env.AVATAR_URL }})
 
           ---
-          *自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*
-          MARKDOWN
+          *自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*"
 
-          BODY=$(cat body.md | jq -Rs .)
-          gh api graphql -f query="mutation { addDiscussionComment(input: { discussionId: \"D_kwDORQmU5s4Ak6V-\", body: $BODY }) { comment { id } } }"
+          # 用 gh api 发评论
+          gh api https://api.github.com/repos/ythx-101/openclaw-qa/discussions/132/comments \
+            -X POST \
+            -F body="$BODY"
