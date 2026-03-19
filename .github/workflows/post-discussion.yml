@@ -14,7 +14,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           DATA=$(curl -s "https://wallpaper-daily-iota.vercel.app/api/latest")
-          
           DESKTOP_TITLE=$(echo "$DATA" | jq -r '.categories.desktop.title')
           DESKTOP_URL=$(echo "$DATA" | jq -r '.categories.desktop.url')
           MOBILE_TITLE=$(echo "$DATA" | jq -r '.categories.mobile.title')
@@ -22,39 +21,21 @@ jobs:
           AVATAR_TITLE=$(echo "$DATA" | jq -r '.categories.avatar.title')
           AVATAR_URL=$(echo "$DATA" | jq -r '.categories.avatar.url')
 
-          # 用 heredoc 构建 body，注意换行用 \n
-          BODY=$(cat << 'ENDBODY'
-## 📅 每日壁纸推荐
+          BODY="## 每日壁纸推荐
 
-### 🖥️ Desktop
-DESKTOP_TITLE_PLACEHOLDER
-DESKTOP_URL_PLACEHOLDER
+Desktop: $DESKTOP_TITLE
+$DESKTOP_URL
 
-### 📱 Mobile
-MOBILE_TITLE_PLACEHOLDER
-MOBILE_URL_PLACEHOLDER
+Mobile: $MOBILE_TITLE
+$MOBILE_URL
 
-### 🧑‍🎤 Avatar
-AVATAR_TITLE_PLACEHOLDER
-AVATAR_URL_PLACEHOLDER
+Avatar: $AVATAR_TITLE
+$AVATAR_URL
 
----
-*自动同步自 [nuanXinProPic](https://github.com/IT-NuanxinPro/nuanXinProPic)*
-ENDBODY
-          )
+自动同步自 nuanXinProPic"
 
-          # 替换变量
-          BODY="${BODY//DESKTOP_TITLE_PLACEHOLDER/**$DESKTOP_TITLE**}"
-          BODY="${BODY//DESKTOP_URL_PLACEHOLDER/![Desktop]($DESKTOP_URL)}"
-          BODY="${BODY//MOBILE_TITLE_PLACEHOLDER/**$MOBILE_TITLE**}"
-          BODY="${BODY//MOBILE_URL_PLACEHOLDER/![Mobile]($MOBILE_URL)}"
-          BODY="${BODY//AVATAR_TITLE_PLACEHOLDER/**$AVATAR_TITLE**}"
-          BODY="${BODY//AVATAR_URL_PLACEHOLDER/![Avatar]($AVATAR_URL)}"
-
-          # 转义 JSON
           BODY_ESCAPED=$(echo "$BODY" | jq -Rs .)
 
-          # 用 REST API 发到 openclaw-qa 仓库
           curl -X POST \
             -H "Authorization: token $GH_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
