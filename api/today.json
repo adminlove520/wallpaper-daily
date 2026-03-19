@@ -1,6 +1,6 @@
 {
   "date": "2026-03-19",
-  "generatedAt": "2026-03-19T03:19:13.764343Z",
+  "generatedAt": "2026-03-19T03:21:15.222726Z",
   "source": "https://wallpaper.061129.xyz",
   "categories": {
     "bing": {
@@ -14,5 +14,6 @@
     "desktop": null,
     "mobile": null,
     "avatar": null
-  }
+  },
+  "note": "Bing 可用。其他分类需要 wallpaper-gallery 网站添加公开 API。"
 }
