@@ -9,7 +9,7 @@
 ### 获取全部分类
 
 ```
-GET https://wallpaper-daily.vercel.app/api/latest
+GET https://wallpaper-daily-iota.vercel.app/api/latest
 GET https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/today.json
 ```
 

@@ -54,7 +54,7 @@ import urllib.request, json
 url = "https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/today.json"
 
 # 或 Vercel API
-# url = "https://wallpaper-daily.vercel.app/api/latest"
+# url = "https://wallpaper-daily-iota.vercel.app/api/latest"
 
 data = json.loads(urllib.request.urlopen(url).read())
 
