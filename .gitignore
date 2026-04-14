@@ -1,5 +1,9 @@
 .vercel
 .env
+scripts/.env
+node_modules/
+temp.b64
+*.b64
 
 # Python
 tmp/

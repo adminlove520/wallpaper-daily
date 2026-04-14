@@ -2,131 +2,64 @@
 
 ## 方案一：Vercel 部署（推荐）
 
-### 1. 部署
-
-点击下方按钮一键部署：
+### 1. 一键部署
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/import?repo=adminlove520/wallpaper-daily)
 
-或者手动部署：
+### 2. 手动部署
 
 ```bash
-# 1. 安装 Vercel CLI
 npm i -g vercel
-
-# 2. 进入目录
 cd wallpaper-daily
-
-# 3. 登录
 vercel login
-
-# 4. 部署
-vercel
-```
-
-### 2. 使用
-
-部署后访问：`https://your-project.vercel.app/api/latest`
-
-### 3. 更新数据
-
-修改 `api/latest.js` 中的数据，然后：
-```bash
 vercel --prod
 ```
 
+### 3. API 端点
+
+| 端点 | 说明 |
+|------|------|
+| `/api/latest` | 获取全部分类壁纸 |
+| `/api/category?name=bing` | 按分类获取（bing/desktop/mobile/avatar） |
+| `/api/random` | 随机返回一个分类的壁纸 |
+
 ---
 
-## 方案二：GitHub RAW（当前可用）
-
-直接使用 GitHub 仓库的 RAW 文件：
+## 方案二：GitHub RAW（无需部署）
 
 ```
 https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/today.json
 ```
 
-**注意**：这个文件需要 GitHub Actions 自动同步才能保持最新。
+数据由 GitHub Actions 每日 02:00 UTC 自动同步。
 
 ---
 
-## 方案三：手动更新 JSON
+## 方案三：Cloudflare Worker
 
-### 1. 获取今日壁纸数据
-
-访问壁纸网站获取各分类最新图片：
-- 电脑壁纸：https://wallpaper.dfyx.click/desktop
-- 每日Bing：https://wallpaper.dfyx.click/bing
-- 手机壁纸：https://wallpaper.dfyx.click/mobile
-- 头像：https://wallpaper.dfyx.click/avatar
-
-### 2. 更新 JSON 文件
-
-编辑 `wallpaper-daily/api/today.json`：
-
-```json
-{
-  "date": "2026-03-19",
-  "generatedAt": "2026-03-19T03:00:00Z",
-  "categories": {
-    "bing": {
-      "title": "激发你的好奇心",
-      "url": "https://www.bing.com/th?id=OHR.xxx_1920x1080.jpg"
-    },
-    "desktop": {
-      "title": "图片标题",
-      "url": "https://cdn.jsdelivr.net/gh/..."
-    },
-    "mobile": {...},
-    "avatar": {...}
-  }
-}
-```
-
-### 3. 提交并推送
+使用 `worker.js` 部署到 Cloudflare Workers，实时从 Bing 获取壁纸。
 
 ```bash
-git add .
-git commit -m "feat: 更新今日壁纸"
-git push
+wrangler deploy worker.js
 ```
 
 ---
 
-## 小溪使用方式
+## 使用示例
 
 ```python
 import urllib.request, json
 
-# 方式一：GitHub RAW
+# GitHub RAW（推荐，无需部署）
 url = "https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/today.json"
 
-# 方式二：Vercel（部署后）
-url = "https://your-project.vercel.app/api/latest"
+# 或 Vercel API
+# url = "https://wallpaper-daily.vercel.app/api/latest"
 
 data = json.loads(urllib.request.urlopen(url).read())
 
-# 获取所有分类
 for cat, info in data['categories'].items():
     if info:
         print(f"{cat}: {info['title']}")
         print(f"  URL: {info['url']}")
 ```
-
----
-
-## 文件结构
-
-```
-wallpaper-daily/
-├── api/
-│   ├── today.json      # 今日壁纸数据
-│   └── latest.js       # Vercel Serverless Function
-├── scripts/
-│   └── sync.py         # 同步脚本
-├── vercel.json         # Vercel 配置
-└── README.md
-```
-
----
-
-有问题随时问！🦞

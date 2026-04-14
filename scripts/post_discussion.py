@@ -12,7 +12,7 @@ except ImportError:
 # Get wallpaper data
 def get_wallpaper_data():
     print("Step 1: Getting wallpaper data...")
-    response = requests.get("https://wallpaper-daily-iota.vercel.app/api/latest")
+    response = requests.get("https://raw.githubusercontent.com/adminlove520/wallpaper-daily/main/api/today.json")
     response.raise_for_status()
     return response.json()
 
