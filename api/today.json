@@ -1,10 +1,10 @@
 {
-  "date": "2026-05-12",
-  "generatedAt": "2026-05-12T05:42:26.727498Z",
+  "date": "2026-05-13",
+  "generatedAt": "2026-05-13T05:53:59.672862Z",
   "categories": {
     "bing": {
-      "title": "振翅, 潜水, 生存",
-      "url": "https://www.bing.com/th?id=OHR.Fratercula_ZH-CN1239275412_1920x1080.jpg"
+      "title": "银河系，摇滚吧！",
+      "url": "https://www.bing.com/th?id=OHR.AlabamaHills_ZH-CN1387018045_1920x1080.jpg"
     },
     "desktop": {
       "title": "阳光下的少女",
@@ -14,9 +14,6 @@
       "title": "阳光下的少女自拍",
       "url": "https://cdn.jsdelivr.net/gh/IT-NuanxinPro/nuanXinProPic@latest/wallpaper/mobile/人像/清新/壁纸-室内-手机.png"
     },
-    "avatar": {
-      "title": "可爱水豚与美味面包",
-      "url": "https://cdn.jsdelivr.net/gh/IT-NuanxinPro/nuanXinProPic@latest/wallpaper/avatar/动漫/喜羊羊与灰太狼/微信图片_2026-04-11_145953_146.jpg"
-    }
+    "avatar": null
   }
 }
